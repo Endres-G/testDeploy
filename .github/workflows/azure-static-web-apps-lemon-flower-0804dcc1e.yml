@@ -18,7 +18,6 @@ jobs:
       id-token: write
       contents: read
     steps:
-      # Checkout do repositório
       - uses: actions/checkout@v3
         with:
           submodules: true
@@ -28,15 +27,15 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.24.5"
+          flutter-version: "3.7.0" # Substitua pela versão que está usando
 
-      # Rodar flutter pub get
+      # Instalar dependências do Node.js (caso tenha o package.json)
       - name: Install Dependencies
-        run: flutter pub get
+        run: npm install
 
-      # Build do projeto Flutter Web
+      # Rodar build do Flutter Web (via npm script ou diretamente)
       - name: Build Flutter Web
-        run: flutter build web --release
+        run: npm run build # Isso irá rodar o script "build" no package.json
 
       # Deploy para Azure Static Web Apps
       - name: Deploy Static Web App
