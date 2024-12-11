@@ -28,7 +28,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "<sua-versao-do-flutter>"
+          flutter-version: "<sua-versao-do-flutter>" # Substitua pela versão do Flutter que está utilizando
 
       # Rodar flutter pub get
       - name: Install Dependencies
@@ -39,26 +39,12 @@ jobs:
         run: flutter build web --release
 
       # Deploy para Azure Static Web Apps
-      - name: Build And Deploy
-        id: builddeploy
+      - name: Deploy Static Web App
+        id: deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_LEMON_FLOWER_0804DCC1E }}
           action: "upload"
-          ###### Configurações do repositório e build ######
-          app_location: "build/web" # Diretório gerado pelo Flutter Web
+          app_location: "build/web" # Caminho do Flutter Web gerado
           api_location: "" # Não usamos APIs no exemplo
           output_location: "" # Diretório de saída não é necessário
-          github_id_token: ${{ steps.idtoken.outputs.result }}
-          ###### Fim das configurações ######
-
-  close_pull_request_job:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    name: Close Pull Request Job
-    steps:
-      - name: Close Pull Request
-        id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          action: "close"
