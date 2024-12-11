@@ -5,5 +5,7 @@
     "build": "flutter build web --release",
     "start": "flutter run -d chrome"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "flutter": "^3.24.5"
+  }
 }
