@@ -1,49 +1,45 @@
-name: Azure Static Web Apps CI/CD
+name: Flutter Build and Deploy
 
 on:
   push:
     branches:
       - main
   pull_request:
-    types: [opened, synchronize, reopened, closed]
     branches:
       - main
 
 jobs:
-  build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+  build:
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-          lfs: false
+    name: Build and Deploy Flutter Web
 
-      # Instalar Flutter
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Forçar a instalação do Flutter
+      - name: Install Flutter manually
+        run: |
+          git clone https://github.com/flutter/flutter.git -b stable --depth 1
+          export PATH="$PATH:`pwd`/flutter/bin"
+          flutter doctor
+
+      # Configurar o Flutter
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "stable" # Substitua pela versão que está usando
+          flutter-version: "stable"
 
-      # Instalar dependências do Node.js (caso tenha o package.json)
-      - name: Install Dependencies
-        run: npm install
-
-      # Rodar build do Flutter Web (via npm script ou diretamente)
+      # Build do Flutter Web
       - name: Build Flutter Web
-        run: npm run build # Isso irá rodar o script "build" no package.json
+        run: flutter build web --release
 
-      # Deploy para Azure Static Web Apps
+      # Deploy para Azure
       - name: Deploy Static Web App
         id: deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_LEMON_FLOWER_0804DCC1E }}
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           action: "upload"
-          app_location: "build/web" # Caminho do Flutter Web gerado
-          api_location: "" # Não estamos usando APIs no exemplo
-          output_location: "" # Diretório de saída não é necessário
+          app_location: "build/web"
+          api_location: ""
