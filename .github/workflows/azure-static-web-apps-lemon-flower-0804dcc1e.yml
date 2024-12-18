@@ -37,7 +37,7 @@ jobs:
         id: deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ 0c584066721f0452cbe6a0c50dface07d120e3baac77d994501f2bb42f67f44e04-4b6e3013-343c-48e4-8ae2-98f60c7baef301e06290804dcc1e }}
+          azure_static_web_apps_api_token: ${{ secrets.MY_SECRET_TOKEN }}
           action: "upload"
           app_location: build/web # Caminho do código-fonte da aplicação
           api_location: "" # Caminho da API, se necessário
