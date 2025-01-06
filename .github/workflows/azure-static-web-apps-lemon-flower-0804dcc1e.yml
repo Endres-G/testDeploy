@@ -1,55 +1,50 @@
-name: Azure Static Web Apps CI/CD
+name: Deploy Flutter Web App to Azure
+
 on:
   push:
     branches:
       - main
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
+
 jobs:
-  build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+  build:
+    name: Build Flutter Web
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
-    permissions:
-      id-token: write
-      contents: read
+
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-          lfs: false
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      # Adicionando o passo de instalação dos pacotes OIDC
-      - name: Install OIDC Client from Core Package
-        run: npm install @actions/core @actions/http-client
-
-      - name: Setup Flutter
+      - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.24.5"
+          channel: stable
 
       - name: Install Dependencies
-        run: flutter build web --release
+        run: flutter pub get
 
-      - name: Deploy Static Web App
-        id: deploy
-        uses: Azure/static-web-apps-deploy@v1
+      - name: Build Flutter Web
+        run: flutter build web
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
         with:
-          azure_static_web_apps_api_token: ${{secrets.MY_SECRET_TOKEN}}
-          action: "upload"
-          app_location: build/web # Caminho do código-fonte da aplicação
-          
+          name: web-build
+          path: build/web
 
-
-  close_pull_request_job:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+  deploy:
+    name: Deploy to Azure Static Web Apps
     runs-on: ubuntu-latest
-    name: Close Pull Request Job
+    needs: build
+
     steps:
-      - name: Close Pull Request
-        id: closepullrequest
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: web-build
+
+      - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
-          action: "close"
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          app_location: "/" # Root directory of the repository
+          output_location: "build/web" # Location of the built Flutter Web app
